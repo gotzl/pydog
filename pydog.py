@@ -10,10 +10,10 @@ try:
 except Exception as e:  print("Could not load dogxl C helper library:", e)
 
 class DOGXL(object):
-    def __init__(self, RST_PIN = 24, DC_PIN = 25, CS_PIN = 8):
+    def __init__(self, viewmode='normal', RST_PIN = 24, DC_PIN = 25, CS_PIN = 8):
         import RPi.GPIO
         import spidev
-
+        self.viewmode = viewmode # 'normal' or 'rotated' (by 180deg)
         self.RST_PIN = RST_PIN
         self.DC_PIN = DC_PIN
         self.CS_PIN = CS_PIN
@@ -49,7 +49,7 @@ class DOGXL(object):
         time.sleep(0.01)
         self.GPIO.output(self.RST_PIN, 1)
         time.sleep(0.01)
-        init_seq = [ 0xf1, 0x67, 0xc0, 0x40, 0x50, 0x2b, 0xeb, 0x81, 0x5f, 0x89, 0xaf]
+        init_seq = [ 0xf1, 0x67, {'normal':0xc0,'rotated':0xc6}[self.viewmode], 0x40, 0x50, 0x2b, 0xeb, 0x81, 0x5f, 0x89, 0xaf]
         self.send_command(init_seq)
         # clear the ram
         self.send_data([0x0]*(self.width*self.height//4))
