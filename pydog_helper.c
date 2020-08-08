@@ -5,7 +5,7 @@ static PyObject * pydog_helper_getbuffer(PyObject* self, PyObject* args) {
     PyArrayObject *buf, *pixels;
     int width, height;
 
-    if (!PyArg_ParseTuple(args, "OOii", &PyArray_Type, &buf, &pixels, &width, &height))
+    if (!PyArg_ParseTuple(args, "OOii", &buf, &pixels, &width, &height))
         return Py_None;
 
     int x,y,greyscale;
@@ -15,10 +15,6 @@ static PyObject * pydog_helper_getbuffer(PyObject* self, PyObject* args) {
             buf->data[y/4 * width + x] |= ( greyscale << ((y % 4)<<1) );
         }
     }
-
-    Py_DECREF(buf);
-    Py_DECREF(pixels);
-
     return Py_None;
 }
 

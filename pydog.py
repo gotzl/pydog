@@ -14,7 +14,6 @@ class DOGXL(object):
         import RPi.GPIO
         import spidev
 
-
         self.RST_PIN = RST_PIN
         self.DC_PIN = DC_PIN
         self.CS_PIN = CS_PIN
@@ -128,3 +127,8 @@ class DOGXL(object):
                     greyscale = ((pixels[x, y])//0x40)&0x3
                     buf[y//4 * imwidth + x] |= ( greyscale << ((y % 4)<<1) )
         return buf
+
+if __name__ == "__main__":
+    from PIL import Image
+    Himage = Image.new('L', (160, 104), 0)
+    DOGXL.getbuffer(Himage)
