@@ -1,4 +1,4 @@
-Small library to interface [EA DOG LCD](https://www.lcd-module.com/produkte/dog.html) displays. Currently, only the DOGXL160-7 is supported with 4-wire SPI communication.
+Small library to interface [EA DOG LCD](https://www.lcd-module.com/produkte/dog.html) displays. Currently, only the DOGXL160-7 is supported with 4-wire SPI communication. Instructions show usage with Raspi.
 
 ## Installation
 ```

@@ -3,17 +3,17 @@ import sys
 import os
 import numpy
 
+dogxl_c = False
+try:
+    import pydog_helper
+    dogxl_c = True
+except:  print("Could not load dogxl C helper library.")
 
 class DOGXL(object):
     def __init__(self, RST_PIN = 24, DC_PIN = 25, CS_PIN = 8):
         import RPi.GPIO
         import spidev
 
-        self.dogxl_c = False
-        try:
-            import pydog_helper
-            self.dogxl_c = True
-        except:  print("Could not load dogxl C helper library.")
 
         self.RST_PIN = RST_PIN
         self.DC_PIN = DC_PIN
@@ -79,7 +79,7 @@ class DOGXL(object):
     def send_data(self, data):
         self.digital_write(self.DC_PIN, 1)
         self.digital_write(self.CS_PIN, 0)
-        if not isinstance(data, list):
+        if not isinstance(data, list) and not isinstance(data, numpy.ndarray):
             data = [data]
         self.spi_writebyte(data)
         self.digital_write(self.CS_PIN, 1)
@@ -117,7 +117,7 @@ class DOGXL(object):
         buf = numpy.zeros(imwidth * imheight//4, dtype=numpy.uint8)
 
         # move bit arithmetic to C code for acceleration
-        if self.dogxl_c:
+        if dogxl_c:
             data = numpy.asarray(image_monocolor)
             pydog_helper.getbuffer(
                 ctypes.c_void_p(buf.ctypes.data),  
