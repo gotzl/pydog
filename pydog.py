@@ -7,7 +7,7 @@ dogxl_c = False
 try:
     import pydog_helper
     dogxl_c = True
-except:  print("Could not load dogxl C helper library.")
+except Exception as e:  print("Could not load dogxl C helper library:", e)
 
 class DOGXL(object):
     def __init__(self, RST_PIN = 24, DC_PIN = 25, CS_PIN = 8):
@@ -119,11 +119,7 @@ class DOGXL(object):
         # move bit arithmetic to C code for acceleration
         if dogxl_c:
             data = numpy.asarray(image_monocolor)
-            pydog_helper.getbuffer(
-                ctypes.c_void_p(buf.ctypes.data),  
-                ctypes.c_void_p(data.ctypes.data),  
-                ctypes.c_int(imwidth), 
-                ctypes.c_int(imheight))
+            pydog_helper.getbuffer(buf, data, imwidth, imheight)
             buf = buf.tolist()
         else:
             pixels = image_monocolor.load()

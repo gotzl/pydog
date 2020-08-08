@@ -1,12 +1,43 @@
-#include <stdio.h>  
-#include <stdint.h>
+#include <Python.h>
+#include <numpy/arrayobject.h>
 
-void getbuffer(uint8_t * buf, uint8_t * pixels, int width, int height) {
+static PyObject * pydog_helper_getbuffer(PyObject* self, PyObject* args) {
+    PyArrayObject *buf, *pixels;
+    int width, height;
+
+    if (!PyArg_ParseTuple(args, "OOii", &PyArray_Type, &buf, &pixels, &width, &height))
+        return Py_None;
+
     int x,y,greyscale;
     for(y=0;y<height;y++) {
         for(x=0;x<width;x++) {
-            greyscale = ((pixels[y*width + x])/0x40)&0x3;
-            buf[y/4 * width + x] |= ( greyscale << ((y % 4)<<1) );
+            greyscale = ((pixels->data[y*width + x])/0x40)&0x3;
+            buf->data[y/4 * width + x] |= ( greyscale << ((y % 4)<<1) );
         }
     }
+
+    Py_DECREF(buf);
+    Py_DECREF(pixels);
+
+    return Py_None;
+}
+
+static PyMethodDef module_methods[] = {
+  {"getbuffer", pydog_helper_getbuffer, METH_VARARGS,
+    "Fills a buffer with pixel values to upload to the display."},
+  {NULL, NULL, 0, NULL},
+};
+
+static struct PyModuleDef cModPyDem =
+{
+    PyModuleDef_HEAD_INIT,
+    "pydog_helper",
+    "",
+    -1,
+    module_methods
+};
+
+PyMODINIT_FUNC PyInit_pydog_helper(void)
+{
+    return PyModule_Create(&cModPyDem);
 }
