@@ -1,20 +1,25 @@
 #include <Python.h>
-#include <numpy/arrayobject.h>
 
 static PyObject * pydog_helper_getbuffer(PyObject* self, PyObject* args) {
-    PyArrayObject *buf, *pixels;
+    Py_buffer buf, pixels;
     int width, height;
+    uint8_t *buf_ptr, *pixels_ptr;
 
-    if (!PyArg_ParseTuple(args, "OOii", &buf, &pixels, &width, &height))
+    if (!PyArg_ParseTuple(args, "y*y*ii", &buf, &pixels, &width, &height))
         return Py_None;
+
+    buf_ptr = (uint8_t*) buf.buf;
+    pixels_ptr = (uint8_t*) pixels.buf;
 
     int x,y,greyscale;
     for(y=0;y<height;y++) {
         for(x=0;x<width;x++) {
-            greyscale = ((pixels->data[y*width + x])/0x40)&0x3;
-            buf->data[y/4 * width + x] |= ( greyscale << ((y % 4)<<1) );
+            greyscale = ((pixels_ptr[y*width + x])/0x40)&0x3;
+            buf_ptr[y/4 * width + x] |= ( greyscale << ((y % 4)<<1) );
         }
     }
+    PyBuffer_Release(&buf);
+    PyBuffer_Release(&pixels);
     return Py_None;
 }
 

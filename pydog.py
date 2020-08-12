@@ -1,7 +1,7 @@
 import time
 import sys
 import os
-import numpy
+import array
 
 dogxl_c = False
 try:
@@ -10,10 +10,10 @@ try:
 except Exception as e:  print("Could not load dogxl C helper library:", e)
 
 class DOGXL(object):
-    def __init__(self, RST_PIN = 24, DC_PIN = 25, CS_PIN = 8):
+    def __init__(self, viewmode='normal', RST_PIN = 24, DC_PIN = 25, CS_PIN = 8):
         import RPi.GPIO
         import spidev
-
+        self.viewmode = viewmode # 'normal' or 'rotated' (by 180deg)
         self.RST_PIN = RST_PIN
         self.DC_PIN = DC_PIN
         self.CS_PIN = CS_PIN
@@ -49,7 +49,7 @@ class DOGXL(object):
         time.sleep(0.01)
         self.GPIO.output(self.RST_PIN, 1)
         time.sleep(0.01)
-        init_seq = [ 0xf1, 0x67, 0xc0, 0x40, 0x50, 0x2b, 0xeb, 0x81, 0x5f, 0x89, 0xaf]
+        init_seq = [ 0xf1, 0x67, {'normal':0xc0,'rotated':0xc6}[self.viewmode], 0x40, 0x50, 0x2b, 0xeb, 0x81, 0x5f, 0x89, 0xaf]
         self.send_command(init_seq)
         # clear the ram
         self.send_data([0x0]*(self.width*self.height//4))
@@ -78,7 +78,7 @@ class DOGXL(object):
     def send_data(self, data):
         self.digital_write(self.DC_PIN, 1)
         self.digital_write(self.CS_PIN, 0)
-        if not isinstance(data, list) and not isinstance(data, numpy.ndarray):
+        if not isinstance(data, list) and not isinstance(data, array.array):
             data = [data]
         self.spi_writebyte(data)
         self.digital_write(self.CS_PIN, 1)
@@ -113,13 +113,12 @@ class DOGXL(object):
     def getbuffer(image):
         image_monocolor = image.convert('L')
         imwidth, imheight = image_monocolor.size
-        buf = numpy.zeros(imwidth * imheight//4, dtype=numpy.uint8)
+        buf = array.array('B', [0]*(imwidth * imheight//4))
 
         # move bit arithmetic to C code for acceleration
         if dogxl_c:
-            data = numpy.asarray(image_monocolor)
-            pydog_helper.getbuffer(buf, data, imwidth, imheight)
-            buf = buf.tolist()
+            pixels = array.array('B', image_monocolor.getdata())
+            pydog_helper.getbuffer(buf, pixels, imwidth, imheight)
         else:
             pixels = image_monocolor.load()
             for y in range(imheight):
@@ -129,6 +128,14 @@ class DOGXL(object):
         return buf
 
 if __name__ == "__main__":
-    from PIL import Image
+    from PIL import Image, ImageDraw
+    import pickle
+
     Himage = Image.new('L', (160, 104), 0)
-    DOGXL.getbuffer(Himage)
+    img = ImageDraw.Draw(Himage)
+    for i in range(Himage.size[0]):
+        img.rectangle((i, 0 , i, 104), fill = (2*i)&0xff)
+    
+    ret = DOGXL.getbuffer(Himage)
+    # pickle.dump(ret, open('test/test.pkl','wb'))
+    # test = pickle.load(open('test/test.pkl','rb'))

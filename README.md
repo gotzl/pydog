@@ -38,3 +38,11 @@ dpl.set_pixel(DOGXL.getbuffer(img),
 dpl.lcd_exit()
 dpl.module_exit()
 ```
+
+## Debugging
+```
+CFLAGS="-O0 -g" CXXFLAGS="-O0 -g" python setup.py build
+cd build/lib.*/
+gdb python
+(gdb) run pydog.py
+```
