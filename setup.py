@@ -1,5 +1,4 @@
 from setuptools import setup, Extension
-import numpy
 
 setup(
     name='pydog',

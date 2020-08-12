@@ -29,7 +29,7 @@ dpl.set_pixel(DOGXL.getbuffer(img))
 # partial (windowed) update
 # height has to be multiple of 4 !
 img = Image.new('L', (60, 4*10), 0)
-img = ImageDraw.Draw(img)
+draw = ImageDraw.Draw(img)
 draw.line((0, 0 , img.width, img.height), fill = 0xff)
 # update window, rectangle at pixel (20,20)
 # y-position has to be multiple of 4 !
