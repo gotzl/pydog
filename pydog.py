@@ -117,7 +117,7 @@ class DOGXL(object):
 
         # move bit arithmetic to C code for acceleration
         if dogxl_c:
-            pixels = array.array('B', image_monocolor.getdata())
+            pixels = image_monocolor.tobytes()
             pydog_helper.getbuffer(buf, pixels, imwidth, imheight)
         else:
             pixels = image_monocolor.load()
