@@ -92,9 +92,9 @@ class DOGXL(object):
             self.send_command([0xf5, pos[1]])
 
             # set column end address
-            self.send_command([0xf6, pos[0]+size[0]])
+            self.send_command([0xf6, pos[0]+size[0]-1])
             # set page end address
-            self.send_command([0xf7, pos[1]+size[1]])
+            self.send_command([0xf7, pos[1]+size[1]-1])
 
             # enable window program
             self.send_command(0xf9)
